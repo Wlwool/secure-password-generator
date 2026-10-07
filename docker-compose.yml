@@ -1,8 +1,6 @@
 services:
-  flask-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  web:
+    build: .
     ports:
-      - "5000:5000"
-    container_name: flask-container
+      - "8000:8000"
+    restart: unless-stopped

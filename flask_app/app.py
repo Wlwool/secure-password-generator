@@ -1,12 +1,17 @@
-import string
-from flask import Flask, request, render_template
 import random
+import string
 
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
 
-def generate_password(length_pass: int=12, use_upper: bool=True, use_digits: bool=True, use_symbols:bool=True) -> str:
+def generate_password(
+    length_pass: int = 12,
+    use_upper: bool = True,
+    use_digits: bool = True,
+    use_symbols: bool = True,
+) -> str:
     """Генерация безопасного пароля с указанными параметрами"""
     lower = string.ascii_lowercase
     upper = string.ascii_uppercase if use_upper else ""
@@ -30,11 +35,13 @@ def generate_password(length_pass: int=12, use_upper: bool=True, use_digits: boo
     return "".join(password)
 
 
-def calculate_password_strength(password: str, use_upper: bool, use_digits: bool, use_symbols: bool) -> int:
+def calculate_password_strength(
+    password: str, use_upper: bool, use_digits: bool, use_symbols: bool
+) -> int:
     """Расчет сложности пароля (0-100)"""
     score = 0
     length = len(password)
-    
+
     # Оценка по длине (максимум 40 баллов)
     if length >= 16:
         score += 40
@@ -44,7 +51,7 @@ def calculate_password_strength(password: str, use_upper: bool, use_digits: bool
         score += 20
     else:
         score += 10
-    
+
     # Оценка по типам символов (максимум 60 баллов)
     char_types = 1  # всегда есть строчные буквы
     if use_upper:
@@ -53,17 +60,19 @@ def calculate_password_strength(password: str, use_upper: bool, use_digits: bool
         char_types += 1
     if use_symbols:
         char_types += 1
-    
+
     score += (char_types - 1) * 20  # 0, 20, 40, 60 баллов
-    
+
     return min(score, 100)
 
+
 @app.route("/")
-def home():
+def home() -> str:
     return render_template("home.html")
 
+
 @app.route("/generate", methods=["GET"])
-def generate():
+def generate() -> str:
     try:
         length = int(request.args.get("length", 12))
         use_upper = "use_upper" in request.args
@@ -71,7 +80,9 @@ def generate():
         use_symbols = "use_symbols" in request.args
 
         password = generate_password(length, use_upper, use_digits, use_symbols)
-        strength = calculate_password_strength(password, use_upper, use_digits, use_symbols)
+        strength = calculate_password_strength(
+            password, use_upper, use_digits, use_symbols
+        )
         return render_template("password.html", password=password, strength=strength)
 
     except Exception as e:

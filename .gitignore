@@ -1,2 +1,8 @@
-/.idea/*
-/.idea/vcs.xml
+.idea/
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
