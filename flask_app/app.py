@@ -91,18 +91,18 @@ def generate() -> ResponseReturnValue:
         strength = calculate_password_strength(
             password, use_upper, use_digits, use_symbols
         )
-        regenerate_params: dict[str, str | int] = {"length": length}
-        if use_upper:
-            regenerate_params["use_upper"] = "on"
-        if use_digits:
-            regenerate_params["use_digits"] = "on"
-        if use_symbols:
-            regenerate_params["use_symbols"] = "on"
+        regenerate_url = url_for(
+            "generate",
+            length=length,
+            use_upper="on" if use_upper else None,
+            use_digits="on" if use_digits else None,
+            use_symbols="on" if use_symbols else None,
+        )
         return render_template(
             "password.html",
             password=password,
             strength=strength,
-            regenerate_url=url_for("generate", **regenerate_params),
+            regenerate_url=regenerate_url,
         )
     except Exception:
         app.logger.exception("Ошибка при генерации пароля")
