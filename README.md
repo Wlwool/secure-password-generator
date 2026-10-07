@@ -1,135 +1,109 @@
-# Flask Docker App - Генератор паролей
+# Secure Password Generator
 
-https://flask-docker-app-nhwy.onrender.com/
+[![Tests](https://github.com/Wlwool/secure-password-generator/actions/workflows/tests.yml/badge.svg)](https://github.com/Wlwool/secure-password-generator/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.13%2B-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-Простое и легковесное веб-приложение на Python с использованием Flask, упакованное в Docker-контейнер. Для изучения Docker и создания переносимых приложений.
+Веб-приложение для генерации надёжных паролей на Flask. Пароли создаются модулем `secrets` из стандартной библиотеки Python, который предназначен для криптографических задач. Приложение упаковано в Docker и работает на Render.
+
+**Демо:** https://flask-docker-app-nhwy.onrender.com/
+
+> Демо размещено на бесплатном тарифе Render: после 15 минут без запросов сервис засыпает, поэтому первое открытие может занять заметное время.
 
 ---
 
 ## Возможности
-- **Минималистичное приложение Flask**
-- **Docker-окружение**: Гарантирует стабильную работу на любой платформе.
-- **Кроссплатформенность**: Легко переносится между Linux и Windows
 
----
-
-## Требования 🛠
-- **Linux/Ubuntu** или **Windows**
-- **Docker** 
-- **Git**
-
----
-
-## Установка и запуск ⚙️
-
-### 1. Клонирование репозитория
-Клонирование с GitHub:
-
-```bash
-git clone https://github.com/Wlwool/flask-docker-app.git
-cd flask-docker-app
-```
-
-## Создание виртуального окружения
-```bash
-python3 -m venv venv
-source venv/bin/activate  # Для Linux
-venv\Scripts\activate     # Для Windows
-```
-
-Зависимости
-```commandline
-pip install -r requirements.txt
-```
-
-### 2.Сборка Docker образа для приложения Flask:
-
-```bash
-docker build -t flask-app .
-```
-
-### 3. Запуск контейнера
-Запуск Flask-приложения в контейнере:
-
-```bash
-docker run -d -p 5000:5000 --name flask-container flask-app
-```
-
-### 4. Доступ к приложению
-Перейдите по адресу:
-http://localhost:5000
-
----
-
-## Запуск на Windows 🖥️
-### Шаг 1: Установка Docker Desktop
-Скачайте и установите Docker Desktop с официального сайта Docker.
-
-### Шаг 2: Клонирование и сборка
-После установки Docker Desktop:
-
-```bash
-Копировать код
-git clone https://github.com/Welzewool/flask-docker-app.git
-cd flask-docker-app
-docker build -t flask-app .
-```
-
-### Шаг 3: Запуск и доступ
-Запустите контейнер:
-
-```bash
-docker run -d -p 5000:5000 --name flask-container flask-app
-```
-
-Перейдите в браузере по адресу http://localhost:5000.
-
-## Обновление проекта 🔄
-Чтобы обновить проект, выполнить:
-
-```bash
-git add .
-git commit -m "Описание изменений"
-git push origin main
-```
-
-Для Windows:
-
-```bash
-git pull origin main
-docker build -t flask-app .
-docker run -d -p 5000:5000 --name flask-container flask-app
-```
-
----
-
-## Запуск с docker-compose
-Запуск приложения одной командой:
-
-```bash
-docker-compose up --build
-```
-
-Приложение станет доступно по адресу:
-http://localhost:5000
-
-### Остановка приложения
-Чтобы остановить приложение:
-```bash
-docker-compose down
-```
-
-```commandline
-http://localhost:5000
-```
+- Длина пароля от 4 до 32 символов.
+- Выбор наборов символов: заглавные и строчные буквы, цифры, спецсимволы.
+- Каждый выбранный тип символов гарантированно встречается в пароле хотя бы один раз.
+- Оценка надёжности пароля. Это эвристика по длине и разнообразию символов, а не расчёт энтропии.
+- Кнопка «Сгенерировать ещё» создаёт новый пароль с теми же параметрами.
+- Понятные сообщения об ошибках при неверной длине.
 
 
 ---
 
-# Планы
-- Добавить дополнительные маршруты и логику в файл app.py.
-- Для улучшения безопасности использовать SSL/TLS при развертывании приложения
+## Технологии
 
-# Лицензия
+- **Python 3.13**, **Flask**, **gunicorn**
+- **uv** для управления зависимостями
+- **pytest** для тестов, **ruff** для линтинга и форматирования, **mypy** для проверки типов
+- **Docker**, **GitHub Actions**, **Render**(а качестве демо)
 
-- Проект распространяется под лицензией MIT. См. файл LICENSE для получения дополнительной информации.
+---
+
+## Запуск в Docker
+
+Нужны Docker и Git.
+
+```bash
+git clone https://github.com/Wlwool/secure-password-generator.git
+cd secure-password-generator
+docker build -t secure-password-generator .
+docker run --rm -p 8000:8000 secure-password-generator
+```
+
+Приложение откроется по адресу http://localhost:8000.
+
+Порт внутри контейнера задаётся переменной `PORT` (по умолчанию 8000):
+
+```bash
+docker run --rm -e PORT=10000 -p 10000:10000 secure-password-generator
+```
+
+### Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Остановка: `Ctrl+C`, затем `docker compose down`.
+
+---
+
+## Локальная разработка
+
+Нужны Python 3.12+ и [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv sync
+uv run flask --app flask_app.app run --port 5001
+```
+
+Приложение откроется по адресу http://127.0.0.1:5001.
+
+### Проверки
+
+Те же команды выполняет CI при каждом пуше и pull request:
+
+```bash
+uv run ruff check
+uv run ruff format --check
+uv run mypy
+uv run pytest -q
+```
+
+---
+
+## Структура проекта
+
+```text
+flask_app/
+  app.py              логика генерации и маршруты
+  templates/          base.html, home.html, password.html
+  static/styles.css   стили
+tests/
+  test_app.py         тесты эндпоинтов и генератора
+Dockerfile            образ на python:3.13-slim, запуск через gunicorn
+docker-compose.yml
+pyproject.toml        зависимости и настройки ruff, mypy, pytest
+uv.lock               зафиксированные версии зависимостей
+.github/workflows/    CI
+```
+
+---
+
+## Лицензия
+
+Проект распространяется под лицензией MIT. Подробности в файле [LICENSE](LICENSE).
