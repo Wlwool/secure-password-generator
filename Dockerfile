@@ -1,18 +1,21 @@
-# Используем базовый образ Python
-FROM python:3.10-slim
+FROM python:3.13-slim
 
-# Устанавливаем рабочую директорию
+COPY --from=ghcr.io/astral-sh/uv:0.12.23 /uv /usr/local/bin/uv
+
+ENV PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=1 \
+    PATH="/app/.venv/bin:$PATH"
+
 WORKDIR /app
 
-# Копируем зависимости и устанавливаем их
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project
 
-# Копируем исходный код
-COPY flask_app/ /app/
+COPY flask_app/ ./flask_app/
 
-# Указываем порт, который будет открыт
-EXPOSE 5000
+RUN useradd --system --no-create-home app
+USER app
 
-# Указываем команду для запуска приложения
-CMD ["python", "app.py"]
+EXPOSE 8000
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "flask_app.app:app"]
