@@ -1,9 +1,15 @@
-import random
+import secrets
 import string
 
 from flask import Flask, render_template, request
+from flask.typing import ResponseReturnValue
 
 app = Flask(__name__)
+
+MIN_LENGTH = 4
+MAX_LENGTH = 32
+SYMBOLS = "!@#$%^&*()_+"
+LENGTH_ERROR = f"Длина пароля должна быть от {MIN_LENGTH} до {MAX_LENGTH}."
 
 
 def generate_password(
@@ -13,26 +19,22 @@ def generate_password(
     use_symbols: bool = True,
 ) -> str:
     """Генерация безопасного пароля с указанными параметрами"""
-    lower = string.ascii_lowercase
-    upper = string.ascii_uppercase if use_upper else ""
-    digits = string.digits if use_digits else ""
-    symbols = "!@#$%^&*()_+" if use_symbols else ""
-
-    if not (lower or upper or digits or symbols):
-        return "[X] Невозможно сгенерировать пароль с заданными параметрами."
-
-    all_chars = lower + upper + digits + symbols
-    password = random.choices(all_chars, k=length_pass)
-
+    pools = [string.ascii_lowercase]
     if use_upper:
-        password[random.randint(0, length_pass - 1)] = random.choice(upper)
+        pools.append(string.ascii_uppercase)
     if use_digits:
-        password[random.randint(0, length_pass - 1)] = random.choice(digits)
+        pools.append(string.digits)
     if use_symbols:
-        password[random.randint(0, length_pass - 1)] = random.choice(symbols)
+        pools.append(SYMBOLS)
 
-    random.shuffle(password)
-    return "".join(password)
+    if length_pass < len(pools):
+        raise ValueError("Длина меньше числа выбранных типов символов")
+
+    all_chars = "".join(pools)
+    chars = [secrets.choice(pool) for pool in pools]
+    chars += [secrets.choice(all_chars) for _ in range(length_pass - len(pools))]
+    secrets.SystemRandom().shuffle(chars)
+    return "".join(chars)
 
 
 def calculate_password_strength(
@@ -68,26 +70,32 @@ def calculate_password_strength(
 
 @app.route("/")
 def home() -> str:
-    return render_template("home.html")
+    return render_template("home.html", min_length=MIN_LENGTH, max_length=MAX_LENGTH)
 
 
 @app.route("/generate", methods=["GET"])
-def generate() -> str:
+def generate() -> ResponseReturnValue:
     try:
-        length = int(request.args.get("length", 12))
-        use_upper = "use_upper" in request.args
-        use_digits = "use_digits" in request.args
-        use_symbols = "use_symbols" in request.args
+        length = int(request.args.get("length", "12"))
+    except ValueError:
+        return LENGTH_ERROR, 400
+    if not MIN_LENGTH <= length <= MAX_LENGTH:
+        return LENGTH_ERROR, 400
 
+    use_upper = "use_upper" in request.args
+    use_digits = "use_digits" in request.args
+    use_symbols = "use_symbols" in request.args
+
+    try:
         password = generate_password(length, use_upper, use_digits, use_symbols)
         strength = calculate_password_strength(
             password, use_upper, use_digits, use_symbols
         )
         return render_template("password.html", password=password, strength=strength)
-
-    except Exception as e:
-        return f"Произошла ошибка: {str(e)}"
+    except Exception:
+        app.logger.exception("Ошибка при генерации пароля")
+        return "Произошла внутренняя ошибка", 500
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="127.0.0.1", port=5001)

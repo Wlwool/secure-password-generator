@@ -13,7 +13,7 @@
     </div>
     <form action="/generate" method="get" class="generator-form">
         <label for="length">Длина пароля:</label>
-        <input type="number" id="length" name="length" value="12" min="4">
+        <input type="number" id="length" name="length" value="12" min="{{ min_length }}" max="{{ max_length }}">
 
         <div class="checkbox-group">
             <label class="checkbox-option">
