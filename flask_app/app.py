@@ -1,7 +1,7 @@
 import secrets
 import string
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for
 from flask.typing import ResponseReturnValue
 
 app = Flask(__name__)
@@ -91,7 +91,19 @@ def generate() -> ResponseReturnValue:
         strength = calculate_password_strength(
             password, use_upper, use_digits, use_symbols
         )
-        return render_template("password.html", password=password, strength=strength)
+        regenerate_url = url_for(
+            "generate",
+            length=length,
+            use_upper="on" if use_upper else None,
+            use_digits="on" if use_digits else None,
+            use_symbols="on" if use_symbols else None,
+        )
+        return render_template(
+            "password.html",
+            password=password,
+            strength=strength,
+            regenerate_url=regenerate_url,
+        )
     except Exception:
         app.logger.exception("Ошибка при генерации пароля")
         return "Произошла внутренняя ошибка", 500

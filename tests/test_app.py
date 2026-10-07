@@ -55,6 +55,19 @@ class TestGenerateEndpoint:
         assert response.status_code == 500
         assert "секрет-деталь" not in response.get_data(as_text=True)
 
+    def test_regenerate_link_keeps_all_params(self, client: FlaskClient) -> None:
+        html = client.get(
+            "/generate?length=12&use_upper=on&use_digits=on&use_symbols=on"
+        ).get_data(as_text=True)
+        expected = 'href="/generate?length=12&amp;use_upper=on&amp;use_digits=on'
+        assert expected in html
+
+    def test_regenerate_link_does_not_add_unchecked_params(
+        self, client: FlaskClient
+    ) -> None:
+        html = client.get("/generate?length=8").get_data(as_text=True)
+        assert 'href="/generate?length=8"' in html
+
 
 class TestGeneratePassword:
     def test_contains_every_requested_type(self) -> None:
