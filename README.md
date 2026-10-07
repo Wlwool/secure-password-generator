@@ -35,16 +35,12 @@
 
 ## Запуск в Docker
 
-Нужны Docker и Git.
-
 ```bash
 git clone https://github.com/Wlwool/secure-password-generator.git
 cd secure-password-generator
 docker build -t secure-password-generator .
 docker run --rm -p 8000:8000 secure-password-generator
 ```
-
-Приложение откроется по адресу http://localhost:8000.
 
 Порт внутри контейнера задаётся переменной `PORT` (по умолчанию 8000):
 
