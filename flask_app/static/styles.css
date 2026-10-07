@@ -255,8 +255,10 @@ form button:hover {
 
 /* Текст пароля */
 .password {
-    font-size: 24px;
+    font-family: ui-monospace, "DejaVu Sans Mono", Consolas, monospace;
+    font-size: 22px;
     font-weight: bold;
+    overflow-wrap: anywhere;
     color: #2ecc71; /* Зелёный цвет */
     text-shadow: 0 0 5px rgba(46, 204, 113, 0.8);
     cursor: pointer;
