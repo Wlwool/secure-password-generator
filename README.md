@@ -58,6 +58,8 @@ docker run --rm -e PORT=10000 -p 10000:10000 secure-password-generator
 docker compose up --build
 ```
 
+Приложение откроется по адресу http://localhost:8000.
+
 Остановка: `Ctrl+C`, затем `docker compose down`.
 
 ---
